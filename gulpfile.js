@@ -4,7 +4,7 @@ var gulp = require('gulp'),
     watch = require('gulp-watch'),
     path = require('path'),
     fs = require('fs'),
-    config = require('./www/jxcore/config')(__dirname),
+    config = require('./config'),
     gulpif = require('gulp-if'),
     uglify = require('gulp-uglify'),
     minifyCss = require('gulp-minify-css'),
@@ -16,7 +16,7 @@ gulp.task('install-jxcore-modules', function (callback) {
         if (err) {
             callback(err);
         } else {
-            npm.commands.install(config.absJXcorePath, [], function (err, data) {
+            npm.commands.install(config.jxcorePath, [], function (err, data) {
                 if (err) {
                     callback(err);
                 } else {
@@ -28,7 +28,7 @@ gulp.task('install-jxcore-modules', function (callback) {
 });
 
 gulp.task('watch-jxcore-modules', ['install-jxcore-modules'], function () {
-    watch([config.absJXcorePath, 'package.json'], function () {
+    watch([config.jxcorePath, 'package.json'], function () {
         gulp.start('install-jxcore-modules');
     });
 });
@@ -55,19 +55,19 @@ gulp.task('move-ngpack-html', function () {
 });
 
 gulp.task('move-shared', function () {
-    return gulp.src('./shared/**', { base: './shared' })
+    return gulp.src(config.sharedPath + '/**', { base: config.sharedPath })
         .pipe(gulp.dest(path.join(config.publicPath, 'shared_components')));
 });
 
 gulp.task('watch-shared', ['move-shared'], function () {
-    watch(['./shared/**/*.js'], function () {
+    watch([config.sharedPath + '/**/*.js'], function () {
         gulp.start('move-shared');
     });
 });
 
-gulp.task('start-server', ['install-jxcore-modules'], function () {
+gulp.task('start-host', function () {
     return nodemon({
-        script: path.resolve(config.absJXcorePath, 'app.js'),
+        script: 'host.js',
         ext: 'js',
         ignore: ['node_modules/*'],
         env: {
@@ -91,7 +91,7 @@ gulp.task('start', [
     'watch-bower-modules',
     'watch-ngpack',
     'watch-shared',
-    'start-server'
+    'start-host'
 ], function () {
     
 });
@@ -122,7 +122,7 @@ gulp.task('move-images', function () {
 });
 
 gulp.task('build', [
-    'build-jxcore-modules',
+    'install-jxcore-modules',
     'build-html-assets',
     'move-ngpack-html',
     'move-custom-fonts',

@@ -4,7 +4,7 @@
     "authors": [
         "karaxuna <kaxabernet@gmail.com>"
     ],
-    "main": "www/jxcore/public/index.html",
+    "main": "public/index.html",
     "license": "MIT",
     "dependencies": {
         "jquery": "2.1.3",

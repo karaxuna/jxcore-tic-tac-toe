@@ -1,6 +1,6 @@
 {
-    "public": "./www/jxcore/public",
+    "public": "./public",
     "modules": "./modules",
-    "output": "./www/jxcore/public/modules.js",
+    "output": "./public/modules.js",
     "relative": true
 }
