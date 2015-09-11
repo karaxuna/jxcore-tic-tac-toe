@@ -34,7 +34,6 @@ var app = angular
                 if (err) {
                     alert(err);
                 } else {
-                    alert('JXcore main file loaded');
                     init();
                 }
             });
@@ -45,6 +44,10 @@ var app = angular
 function init() {
     app.value('enums', enums);
     setTimeout(function () {
-        angular.bootstrap(document, [app.name]);
+        try {
+            angular.bootstrap(document, [app.name]);
+        } catch (err) {
+            alert(err);
+        }
     });
 }

@@ -4,7 +4,7 @@ angular
         '$stateProvider',
         function (stateProvider) {
             stateProvider.state(module.name, {
-                url: '/',
+                url: '',
                 templateUrl: module.path + '/views/layout.html',
                 controller: module.name + '.c.main'
             });

@@ -4,7 +4,7 @@ angular
         '$stateProvider',
         function (stateProvider) {
             stateProvider.state(module.name, {
-                url: 'single',
+                url: '/single',
                 abstract: true,
                 template: '<div ui-view></div>'
             });
