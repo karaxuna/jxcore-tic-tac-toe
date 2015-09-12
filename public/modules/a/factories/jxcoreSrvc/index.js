@@ -1,14 +1,18 @@
 app.factory(current.name, ['$q', function(q) {
     return {
-        callAsyncFunction: function (name, data) {
+        call: function (name) {
             var defered = q.defer();
-            jxcore(name).call(data, function (result, err) {
+            var jxcoreFunction = jxcore(name);
+            var args = Array.prototype.slice.call(arguments, 1);
+
+            jxcoreFunction.call.apply(jxcoreFunction, args.concat(function (result, err) {
                 if (err) {
                     defered.reject(err);
                 } else {
                     defered.resolve(result);
                 }
-            });
+            }));
+
             return defered.promise;
         }
     };

@@ -1,3 +1,5 @@
 {
-    "dependencies": {}
+    "dependencies": {
+        "jxm": "0.3.9"
+    }
 }

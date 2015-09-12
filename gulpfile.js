@@ -130,3 +130,7 @@ gulp.task('build', [
 ], function (){
 
 });
+
+gulp.task('android', ['build'], function () {
+    return gulp.src('').pipe(shell('cordova run android'));
+});
