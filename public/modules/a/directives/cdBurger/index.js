@@ -7,13 +7,23 @@ angular.module(module.name)
             replace: true,
             scope: true, 
             controller: ['$scope', '$attrs', function (scope, attrs) {
-                this.expanded = function (expanded) {
+                var ctrl = this;
+
+                ctrl.expanded = function (expanded) {
                     if (typeof expanded !== 'undefined') {
                        scope.expanded = expanded; 
                     } else{
                         return scope.expanded;
                     }
                 };
+
+                ctrl.toggle = function () {
+                    ctrl.expanded(!scope.expanded);
+                };
+
+                scope.$on('$stateChangeSuccess', function () {
+                    ctrl.expanded(false);
+                });
             }]
         }
     }])
@@ -43,9 +53,7 @@ angular.module(module.name)
             scope: true,
             link: function (scope, element, attrs, burgerCtrl) {
                 scope.expanded = burgerCtrl.expanded;
-                scope.toggle = function () {
-                    scope.expanded(!scope.expanded());
-                };
+                scope.toggle = burgerCtrl.toggle;
             }
         }
     }])
