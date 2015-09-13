@@ -18,6 +18,15 @@ var app = angular
 	.run(['$rootScope', '$state', '$location', 'enums',
         function (rootScope, state, location, enums) {
             rootScope.enums = enums;
+
+            [
+                'start',
+                'filled'
+            ].forEach(function (name) {
+                jxcore(name).register(function (data) {
+                    rootScope.$broadcast('server:' + name, data);
+                });
+            });
         }
     ]);
 

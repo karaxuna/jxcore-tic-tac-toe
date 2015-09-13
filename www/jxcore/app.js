@@ -16,15 +16,12 @@ var name = 'TicTacToe',
     peer;
 
 server.setApplication(name, url, key);
-server.linkResourcesFromPath('/', path.resolve(__dirname, './build'));
-
 server.on('start', function() {
     alert.call('Server started');
 });
 
 server.addJSMethod('connectToServer', function(env, rpd) {
     alert.call('Server got connection request');
-    try {
     if (peer) {
         alert.call('No peer');
         server.sendCallBack(env, false);
@@ -63,24 +60,25 @@ server.addJSMethod('connectToServer', function(env, rpd) {
 
         client.Connect();
     }
-    } catch(err) { alert(err.message); };
 });
 
 server.addJSMethod('fill', function(env, data) {
+    alert.call('Peer filled: ' + data.i + ':' + data.j);
     Mobile('filled').call(data);
     server.sendCallBack(env);
 });
 
-Mobile('finish').registerSync(function(data) {
-    peer.Close();
+Mobile('finish').registerSync(function() {
+    if (peer) {
+        peer.Close();
+    }
     peer = null;
     game = null;
-    alert.call('Game over. Winner is ' + data.winner);
 });
 
 Mobile('fill').registerAsync(function(data, callback) {
-    alert.call('Fill called');
-    client.Call('fill', data, callback);
+    alert.call('Fill called: ' + data.i + ':' + data.j);
+    peer.Call('fill', data, callback);
 });
 
 Mobile('setGameConfig').registerSync(function(data) {
@@ -101,14 +99,13 @@ Mobile('connectToServer').registerAsync(function(ip, callback) {
     var client = server.createClient(null, url, key, ip, port);
     client.on('connect', function(client) {
         alert.call('Connected to server');
-        try {
         var peerData = {
             port: port,
             url: url,
             ip: getLocalIP()
         };
 
-        alert.call('Get game data');
+        alert.call('Getting game data');
         client.Call('connectToServer', peerData, function(game, err) {
             if (err) {
                 alert.call('Error while calling server\'s method. Code: ' + err);
@@ -122,7 +119,6 @@ Mobile('connectToServer').registerAsync(function(ip, callback) {
                 Mobile('start').call();
             }
         });
-        } catch (err) { alert.call(err.message); }
     });
 
     client.on('close', function(client) {
@@ -179,8 +175,7 @@ function getLocalIP() {
         }
     }
 
-    // temp fix for emulator
-    return (ips[0] === '10.0.2.15' ? '192.168.0.104' : ips[0]);
+    return ips[0];
 }
 
 Mobile('getLocalIP').registerSync(getLocalIP);

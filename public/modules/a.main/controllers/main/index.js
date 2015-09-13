@@ -2,11 +2,10 @@ angular.module(module.name).controller(module.name + '.c.' + current.name, [
     '$scope',
     '$state',
     'localIP',
-    'jxcoreSrvc',
     
-    function (scope, state, localIP, jxcoreSrvc) {
+    function (scope, state, localIP) {
         scope.localIP = localIP;
-        jxcoreSrvc.on('start', function () {
+        scope.$on('server:start', function () {
             state.go('a.main.multi');
         });
     }
