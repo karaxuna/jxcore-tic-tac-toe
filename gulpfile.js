@@ -1,6 +1,5 @@
 var gulp = require('gulp'),
     shell = require('gulp-shell'),
-    nodemon = require('gulp-nodemon'),
     watch = require('gulp-watch'),
     path = require('path'),
     fs = require('fs'),
@@ -65,17 +64,6 @@ gulp.task('watch-shared', ['move-shared'], function () {
     });
 });
 
-gulp.task('start-host', function () {
-    return nodemon({
-        script: 'host.js',
-        ext: 'js',
-        ignore: ['node_modules/*'],
-        env: {
-            'NODE_ENV': 'development'
-        }
-    });
-});
-
 gulp.task('install-bower-modules', function () {
     return gulp.src('').pipe(shell('bower install --allow-root'));
 });
@@ -90,8 +78,7 @@ gulp.task('start', [
     'watch-jxcore-modules',
     'watch-bower-modules',
     'watch-ngpack',
-    'watch-shared',
-    'start-host'
+    'watch-shared'
 ], function () {
     
 });
@@ -133,4 +120,8 @@ gulp.task('build', [
 
 gulp.task('android', ['build'], function () {
     return gulp.src('').pipe(shell('cordova run android'));
+});
+
+gulp.task('android-emulate', ['build'], function () {
+    return gulp.src('').pipe(shell('cordova emulate android'));
 });

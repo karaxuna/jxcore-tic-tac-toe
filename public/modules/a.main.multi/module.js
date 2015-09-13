@@ -5,8 +5,13 @@ angular
         function (stateProvider) {
             stateProvider.state(module.name, {
                 url: '/multi',
-                abstract: true,
-                template: '<div ui-view></div>'
+                templateUrl: module.path + '/views/layout.html',
+                controller: module.name + '.c.multi',
+                resolve: {
+                    game: ['jxcoreSrvc', function (jxcoreSrvc) {
+                        return jxcoreSrvc.call('getGame');
+                    }]
+                }
             });
         }
     ]);

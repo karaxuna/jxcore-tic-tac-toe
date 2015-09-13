@@ -4,12 +4,12 @@ angular
         '$stateProvider',
         function (stateProvider) {
             stateProvider.state(module.name, {
-                url: '',
+                url: '/config',
                 templateUrl: module.path + '/views/layout.html',
-                controller: module.name + '.c.main',
+                controller: module.name + '.c.config',
                 resolve: {
-                    localIP: ['jxcoreSrvc', function (jxcoreSrvc) {
-                        return jxcoreSrvc.call('getLocalIP', true);
+                    gameConfig: ['jxcoreSrvc', function (jxcoreSrvc) {
+                        return jxcoreSrvc.call('getGameConfig');
                     }]
                 }
             });

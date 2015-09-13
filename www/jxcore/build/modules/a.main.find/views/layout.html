@@ -1,0 +1,11 @@
+<div>
+    <form name="findForm" ng-submit="connect()">
+        <div>
+            <label>Partner ip</label>
+            <input type="text" ng-model="model.ip" ng-required="true" />
+        </div>
+        <div>
+            <button ng-click="connectToServer()" ng-disabled="findForm.$invalid">connect</button>
+        </div>
+    </form>
+</div>

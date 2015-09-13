@@ -5,19 +5,19 @@ angular.module(module.name).directive(current.name, [function(){
         template: '<canvas width="400" height="400" id="canvas"></canvas>',
         scope: {
             dimensions: '=',
-            winningScore: '='
+            winningScore: '=',
+            turn: '=',
+            me: '=',
+            onInit: '='
         },
         link: function(scope, element, attrs){
             var game = new xox.Game({
                 context: element.get(0).getContext('2d'),
                 width: scope.dimensions,
                 height: scope.dimensions,
-                winningScore: scope.winningScore
-            });
-
-            game.on('over', function () {
-                alert('winner is ' + game.winner);
-                game.restart();
+                winningScore: scope.winningScore,
+                turn: scope.turn,
+                me: scope.me
             });
 
             var canvas = game.scene.context.canvas;
@@ -26,6 +26,7 @@ angular.module(module.name).directive(current.name, [function(){
             canvas.width = width;
             canvas.height = width;
             game.scene.redraw();
+            scope.onInit(game);
         }
     };
 }]);
