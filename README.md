@@ -32,7 +32,7 @@ cd jxcore-tic-tac-toe
 jx install
 ```
 
-Add platforms:
+Add cordova platforms:
 
 ```bash
 cordova platforms add android
