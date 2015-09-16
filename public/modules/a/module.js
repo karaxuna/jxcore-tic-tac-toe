@@ -3,39 +3,72 @@ var app = angular
         'ui.router',
         'ngResource',
         'ngSanitize',
-        'ngAnimate'
+        'ngAnimate',
+        'btford.socket-io'
     ].concat(module.dependencies))
 	.config(['$stateProvider', '$urlRouterProvider','$locationProvider',
 		function(stateProvider, urlRouterProvider, locationProvider){
 			stateProvider.state(module.name, {
 				url: '',
-				template: '<div ui-view class="lang-ka"></div>',
-				abstract: true
+				template: '<div ui-view></div>',
+				abstract: true,
+                resolve: {
+                    socketSrvc: ['$q', 'socketFactory', 'host', function (q, socketFactory, host) {
+                        if (host === '/') {
+                            host = ':' + (location.port || 80) + '/';
+                        }
+
+                        try {
+                            var s = socketFactory({
+                                prefix: 'server:',
+                                ioSocket: io.connect(host)
+                            });
+
+                            var oemit = s.emit;
+                            s.emit = function (name, data) {
+                                console.log('emitted', name);
+                                var defered = q.defer();
+                                oemit.call(s, name, data, function (err, data) {
+                                    if (err) {
+                                        alert('error', name, err);
+                                        defered.reject(err);
+                                    } else {
+                                        console.log('answered', name);
+                                        defered.resolve(data);
+                                    }
+                                });
+                                return defered.promise;
+                            };
+
+                            s.forward([
+                                'game-created',
+                                'player-joined-game',
+                                'game-started',
+                                'filled',
+                                'player-left-game',
+                                'game-discarded'
+                            ]);
+
+                            return s;
+                        } catch (err) {
+                            alert(err.message);
+                        }
+                    }]
+                }
 			});
 			locationProvider.html5Mode(false).hashPrefix('!');
 		}
 	])
-	.run(['$rootScope', '$state', '$location', 'enums',
-        function (rootScope, state, location, enums) {
-            rootScope.enums = enums;
-
-            [
-                'start',
-                'filled'
-            ].forEach(function (name) {
-                jxcore(name).register(function (data) {
-                    rootScope.$broadcast('server:' + name, data);
-                });
-            });
-        }
-    ]);
+	.run(['$rootScope', 'enums', function (rootScope, enums) {
+        rootScope.enums = enums;
+    }]);
 
 // start angular after jxcore is ready
 (function check() {
     if (typeof jxcore === 'undefined') {
         setTimeout(check, 5);
     } else if (jxcore === 'none' || cordova === 'none') {
-        init();
+        init('/');
     } else {
         jxcore.isReady(function () {
             jxcore('alert').register(alert);
@@ -43,20 +76,28 @@ var app = angular
                 if (err) {
                     alert(err);
                 } else {
-                    init();
+                    jxcore('getLocalIP').call(function (ip) {
+                        init(ip);
+                    });
                 }
             });
         });
     }
 })();
 
-function init() {
-    app.value('enums', enums);
-    setTimeout(function () {
-        try {
+function init(host) {
+    var s = document.createElement('script');
+    s.async = false;
+    s.src = host + 'socket.io/socket.io.js';
+    document.body.appendChild(s);
+
+    (function _check() {
+        if (window.io) {
+            app.value('enums', enums);
+            app.value('host', host);
             angular.bootstrap(document, [app.name]);
-        } catch (err) {
-            alert(err);
+        } else {
+            setTimeout(_check, 5);
         }
-    });
+    })();
 }

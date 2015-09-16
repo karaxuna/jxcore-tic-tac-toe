@@ -7,9 +7,10 @@ angular
                 url: '',
                 templateUrl: module.path + '/views/layout.html',
                 controller: module.name + '.c.main',
+                abstract: true,
                 resolve: {
-                    localIP: ['jxcoreSrvc', function (jxcoreSrvc) {
-                        return jxcoreSrvc.call('getLocalIP', true);
+                    localIP: ['host', function (host) {
+                        return host === '/' ? window.location.path : host;
                     }]
                 }
             });

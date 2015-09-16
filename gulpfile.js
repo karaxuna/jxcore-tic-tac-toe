@@ -8,7 +8,8 @@ var gulp = require('gulp'),
     uglify = require('gulp-uglify'),
     minifyCss = require('gulp-minify-css'),
     useref = require('gulp-useref'),
-    npm = require('npm');
+    npm = require('npm'),
+    nodemon = require('gulp-nodemon');
 
 gulp.task('install-jxcore-modules', function (callback) {
     npm.load(function (err) {
@@ -74,11 +75,23 @@ gulp.task('watch-bower-modules', ['install-bower-modules'], function () {
     });
 });
 
+gulp.task('start-server', function () {
+    return nodemon({
+        script: path.resolve(config.jxcorePath, 'app.js'),
+        ext: 'js',
+        ignore: ['node_modules/*'],
+        env: {
+            'NODE_ENV': 'development'
+        }
+    });
+});
+
 gulp.task('start', [
     'watch-jxcore-modules',
     'watch-bower-modules',
     'watch-ngpack',
-    'watch-shared'
+    'watch-shared',
+    'start-server'
 ], function () {
     
 });
