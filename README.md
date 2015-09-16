@@ -52,7 +52,7 @@ Run application:
 gulp android
 ```
   
-This command automatically installs bower packages and node packages for jxcore, builds ngpack and runs cordova on android platform. That's it! You can also run development server (`localhost:8001`) on computer that works just like application:
+This command automatically installs bower packages and node packages for jxcore, builds ngpack and runs cordova on android platform. That's it! You can also run development server (`localhost:8001`) on computer and it will work just like application:
 
 ```bash
 gulp start
