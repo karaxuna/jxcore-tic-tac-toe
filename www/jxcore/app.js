@@ -23,6 +23,14 @@ function getSocketById(socketId) {
     })[0];
 }
 
+function getGameById(gameId) {
+    return io.sockets.sockets.filter(function (socket) {
+        return socket.game && socket.game.id === gameId;
+    }).map(function (socket) {
+        return socket.game;
+    })[0];
+}
+
 function getGames() {
     return io.sockets.sockets.filter(function (socket) {
         return socket.game;
@@ -90,9 +98,11 @@ io.on('connection', function(socket) {
     });
 
     socket.on('start-game', function (data, callback) {
-        var game = socket.game;
+        var game = getGameById(data.gameId);
         if (!game) {
             callback('Game does not exist');
+        } else if (game.players.indexOf(socket.id) === -1) {
+            callback('You are not a player of this game');
         } else {
             game.started = true;
             io.sockets.sockets.forEach(function (_socket) {
@@ -106,12 +116,7 @@ io.on('connection', function(socket) {
     });
 
     socket.on('fill', function (data, callback) {
-        var game = io.sockets.sockets.map(function (_socket) {
-            return _socket.game;
-        }).filter(function (_game) {
-            return _game && _game.id === data.gameId;
-        })[0];
-
+        var game = getGameById(data.gameId);
         if (!game) {
             callback('Game not found');
         } else if (game.players.indexOf(socket.id) === -1) {
@@ -134,8 +139,8 @@ io.on('connection', function(socket) {
     });
 
     socket.on('leave-game', function (data, callback) {
-        return io.sockets.sockets.forEach(function (_socket) {
-            if (socket.game) {
+        io.sockets.sockets.forEach(function (_socket) {
+            if (_socket.game) {
                 var game = _socket.game;
                 var players = game.players;
                 players.splice(players.indexOf(socket.id), 1);
@@ -152,6 +157,7 @@ io.on('connection', function(socket) {
                 }
             }
         });
+        callback(null);
     });
 
     socket.broadcast.emit('player-connected', {
@@ -160,11 +166,24 @@ io.on('connection', function(socket) {
 
     socket.on('disconnect', function () {
         io.sockets.sockets.forEach(function (_socket) {
-            if (socket.game && socket.game.players.indexOf(socket.id) !== -1) {
-                io.emit('player-left-game', {
-                    gameId: socket.game.id,
-                    playerSocketId: socket.id
-                });
+            var game = _socket.game;
+            if (game) {
+                var players = game.players;
+                var playerIndex = players.indexOf(socket.id);
+                if (playerIndex !== -1) {
+                    players.splice(playerIndex, 1);
+                    if (game.players.length === 0) {
+                        _socket.game = null;
+                        io.emit('game-discarded', {
+                            gameId: game.id
+                        });
+                    } else {
+                        io.emit('player-left-game', {
+                            gameId: game.id,
+                            playerSocketId: socket.id
+                        });
+                    }
+                }
             }
         });
     });

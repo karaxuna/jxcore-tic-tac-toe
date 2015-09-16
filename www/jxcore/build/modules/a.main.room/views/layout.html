@@ -1,21 +1,27 @@
-<table ng-if="!game.started">
-    <tr>
-        <th>Width</th>
-        <th>Height</th>
-        <th>W. score</th>
-        <th>Players joined</th>
-        <th></th>
-    </tr>
-    <tr>
-        <td ng-bind="game.width"></td>
-        <td ng-bind="game.height"></td>
-        <td ng-bind="game.winningScore"></td>
-        <td ng-bind="game.players.length"></td>
-        <td>
-            <button type="button" ng-click="start()">Start</button>
-        </td>
-    </tr>
-</table>
+<div ng-if="!game.started">
+    <table>
+        <tr>
+            <th>Width</th>
+            <td ng-bind="game.width"></td>
+        </tr>
+        <tr>
+            <th>Height</th>
+            <td ng-bind="game.height"></td>
+        </tr>
+        <tr>
+            <th>W. score</th>
+            <td ng-bind="game.winningScore"></td>
+        </tr>
+        <tr>
+            <th>Players joined</th>
+            <td ng-bind="game.players.length"></td>
+        </tr>
+    </table>
+    <br/>
+    <div>
+        <button type="button" ng-click="start()">Start</button>
+    </div>
+</div>
 <div ng-if="game.started">
     <cd-xox
     me-index="meIndex"
@@ -26,4 +32,7 @@
     letters="game.letters"
     on-init="init"
     ></cd-xox>
+</div>
+<div ng-if="winner">
+    <a ui-sref="^.find">Find or create another game</a>
 </div>

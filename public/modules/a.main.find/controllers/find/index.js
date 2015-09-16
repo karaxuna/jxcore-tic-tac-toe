@@ -8,12 +8,8 @@ angular.module(module.name).controller(module.name + '.c.' + current.name, [
         scope.games = games;
 
         scope.enterGame = function (game) {
-            socketSrvc.emit('enter-game', {
+            state.go('^.room', {
                 gameId: game.id
-            }).then(function () {
-                state.go('^.room', {
-                    gameId: game.id
-                });
             });
         };
 

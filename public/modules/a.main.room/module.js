@@ -8,9 +8,11 @@ angular
                 templateUrl: module.path + '/views/layout.html',
                 controller: module.name + '.c.room',
                 resolve: {
-                    game: ['$stateParams', 'socketSrvc', function (stateParams, socketSrvc) {
+                    game: ['$stateParams', '$state', 'socketSrvc', function (stateParams, state, socketSrvc) {
                         return socketSrvc.emit('enter-game', {
                             gameId: stateParams.gameId
+                        }).catch(function () {
+                            state.go('a.main.find');
                         });
                     }]
                 }

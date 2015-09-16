@@ -6,7 +6,7 @@
         <th>Started</th>
         <th></th>
     </tr>
-    <tr ng-repeat="game in games">
+    <tr ng-repeat="game in games track by game.id">
         <td ng-bind="game.width"></td>
         <td ng-bind="game.height"></td>
         <td ng-bind="game.winningScore"></td>

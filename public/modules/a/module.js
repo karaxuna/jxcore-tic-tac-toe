@@ -13,47 +13,52 @@ var app = angular
 				template: '<div ui-view></div>',
 				abstract: true,
                 resolve: {
-                    socketSrvc: ['$q', 'socketFactory', 'host', function (q, socketFactory, host) {
-                        if (host === '/') {
-                            host = ':' + (location.port || 80) + '/';
-                        }
+                    socketSrvc: ['$q', '$rootScope', 'socketFactory', 'host', 'notify',
+                        function (q, rootScope, socketFactory, host, notify) {
+                            if (host === '/') {
+                                host = ':' + (location.port || 80) + '/';
+                            }
 
-                        try {
-                            var s = socketFactory({
-                                prefix: 'server:',
-                                ioSocket: io.connect(host)
-                            });
-
-                            var oemit = s.emit;
-                            s.emit = function (name, data) {
-                                console.log('emitted', name);
-                                var defered = q.defer();
-                                oemit.call(s, name, data, function (err, data) {
-                                    if (err) {
-                                        alert('error', name, err);
-                                        defered.reject(err);
-                                    } else {
-                                        console.log('answered', name);
-                                        defered.resolve(data);
-                                    }
+                            try {
+                                var s = socketFactory({
+                                    prefix: 'server:',
+                                    ioSocket: io.connect(host)
                                 });
-                                return defered.promise;
-                            };
 
-                            s.forward([
-                                'game-created',
-                                'player-joined-game',
-                                'game-started',
-                                'filled',
-                                'player-left-game',
-                                'game-discarded'
-                            ]);
+                                var loading = 0;
+                                var oemit = s.emit;
+                                s.emit = function (name, data) {
+                                    if(++loading === 1) rootScope.$broadcast('loading:progress');
+                                    console.log('emitted', name);
+                                    var defered = q.defer();
+                                    oemit.call(s, name, data, function (err, data) {
+                                        if(--loading === 0) rootScope.$broadcast('loading:finish');
+                                        if (err) {
+                                            notify.error(name + ': ' + err);
+                                            defered.reject(err);
+                                        } else {
+                                            console.log('answered', name);
+                                            defered.resolve(data);
+                                        }
+                                    });
+                                    return defered.promise;
+                                };
 
-                            return s;
-                        } catch (err) {
-                            alert(err.message);
+                                s.forward([
+                                    'game-created',
+                                    'player-joined-game',
+                                    'game-started',
+                                    'filled',
+                                    'player-left-game',
+                                    'game-discarded'
+                                ]);
+
+                                return s;
+                            } catch (err) {
+                                alert(err.message);
+                            }
                         }
-                    }]
+                    ]
                 }
 			});
 			locationProvider.html5Mode(false).hashPrefix('!');

@@ -10,7 +10,9 @@ angular.module(module.name).controller(module.name + '.c.' + current.name, [
         scope.winner;
 
         scope.start = function () {
-            socketSrvc.emit('start-game');
+            socketSrvc.emit('start-game', {
+                gameId: scope.game.id
+            });
         };
 
         scope.init = function (game) {
@@ -29,7 +31,7 @@ angular.module(module.name).controller(module.name + '.c.' + current.name, [
 
             scope.$on('server:filled', function (e, data) {
                 if (data.gameId === scope.game.id) {
-                    game.fill(data.i, data.j);
+                    game.fill(data.i, data.j, false, true);
                 }
             });
         };
@@ -40,21 +42,21 @@ angular.module(module.name).controller(module.name + '.c.' + current.name, [
             });
         });
 
-        scope.$on('game-discarded', function (e, data) {
+        scope.$on('server:game-discarded', function (e, data) {
             if (data.gameId === scope.game.id) {
                 alert('Game has been discarded');
                 state.go('^.find');
             }
         });
 
-        scope.$on('player-left-game', function (e, data) {
+        scope.$on('server:player-left-game', function (e, data) {
             if (data.gameId === scope.game.id) {
                 var players = scope.game.players;
                 players.splice(players.indexOf(data.playerSocketId), 1);
             }
         });
 
-        scope.$on('player-joined-game', function (e, data) {
+        scope.$on('server:player-joined-game', function (e, data) {
             if (data.gameId === scope.game.id) {
                 scope.game.players.push(data.playerSocketId);
             }
