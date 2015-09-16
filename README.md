@@ -24,3 +24,22 @@ jx install ngpack -g
 sudo apt-get install dos2unix
 cd /usr/local/lib/node_modules/ngpack && sudo dos2unix ./**/*
 ```
+
+Navigate to project root and install local dependencies:
+
+```bash
+cd jxcore-tic-tac-toe
+jx install
+```
+
+Run application:
+
+```bash
+gulp android
+```
+  
+This command automatically installs bower packages and node packages for jxcore, builds ngpack and runs cordova on android platform. That's it! You can also run development server (`localhost:8001`) on computer that works just like application:
+
+```bash
+gulp start
+```
