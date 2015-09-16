@@ -3,10 +3,24 @@
 
 ## Installation steps:
 
-1. Clone repository:
+Clone repository:
 
-```
+```bash
 git clone https://github.com/karaxuna/jxcore-tic-tac-toe.git
 ```
 
-2. [Download and install JXcore](http://jxcore.com/downloads/);
+[Download and install JXcore](http://jxcore.com/downloads/). Then install necessary global node modules:
+
+```bash
+jx install cordova -g
+jx install bower -g
+jx install gulp -g
+jx install ngpack -g
+```
+
+**Fix `ngpack` bug if you are *nix user:**
+
+```bash
+sudo apt-get install dos2unix
+cd /usr/local/lib/node_modules/ngpack && sudo dos2unix ./**/*
+```
