@@ -9,6 +9,7 @@ angular.module(module.name).directive(current.name, [function(){
             winningScore: '=',
             turnIndex: '=',
             meIndex: '=',
+            letters: '=',
             onInit: '='
         },
         link: function(scope, element, attrs){
@@ -18,7 +19,8 @@ angular.module(module.name).directive(current.name, [function(){
                 height: scope.dimHeight,
                 winningScore: scope.winningScore,
                 turnIndex: scope.turnIndex,
-                meIndex: scope.meIndex
+                meIndex: scope.meIndex,
+                letters: scope.letters
             });
 
             var canvas = game.scene.context.canvas;

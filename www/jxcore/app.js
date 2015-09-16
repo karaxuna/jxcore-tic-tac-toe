@@ -47,7 +47,7 @@ io.on('connection', function(socket) {
     socket.on('create-game', function (game, callback) {
         var game = {
             id: '' + Date.now(),
-            letters: game.letters,
+            maxPlayers: game.maxPlayers,
             turnIndex: game.turnIndex,
             width: game.width,
             height: game.height,
@@ -83,7 +83,7 @@ io.on('connection', function(socket) {
             callback('Game has already started');
         } else {
             if (game.players.indexOf(socket.id) === -1) {
-                if (game.letters.length === game.players.length) {
+                if (game.maxPlayers === game.players.length) {
                     callback('Game is full of players');
                 } else {
                     game.players.push(socket.id);
@@ -139,39 +139,17 @@ io.on('connection', function(socket) {
     });
 
     socket.on('leave-game', function (data, callback) {
-        io.sockets.sockets.forEach(function (_socket) {
-            if (_socket.game) {
-                var game = _socket.game;
-                var players = game.players;
-                players.splice(players.indexOf(socket.id), 1);
-                if (game.players.length === 0) {
-                    _socket.game = null;
-                    io.emit('game-discarded', {
-                        gameId: game.id
-                    });
-                } else {
-                    io.emit('player-left-game', {
-                        gameId: game.id,
-                        playerSocketId: socket.id
-                    });
-                }
-            }
-        });
-        callback(null);
-    });
-
-    socket.broadcast.emit('player-connected', {
-        socketId: socket.id
-    });
-
-    socket.on('disconnect', function () {
-        io.sockets.sockets.forEach(function (_socket) {
-            var game = _socket.game;
-            if (game) {
-                var players = game.players;
-                var playerIndex = players.indexOf(socket.id);
-                if (playerIndex !== -1) {
-                    players.splice(playerIndex, 1);
+        if (socket.game) {
+            io.emit('game-discarded', {
+                gameId: socket.game.id
+            });
+            socket.game = null;
+        } else {
+            io.sockets.sockets.forEach(function (_socket) {
+                if (_socket.game) {
+                    var game = _socket.game;
+                    var players = game.players;
+                    players.splice(players.indexOf(socket.id), 1);
                     if (game.players.length === 0) {
                         _socket.game = null;
                         io.emit('game-discarded', {
@@ -184,8 +162,43 @@ io.on('connection', function(socket) {
                         });
                     }
                 }
-            }
-        });
+            });
+        }
+        callback(null);
+    });
+
+    socket.broadcast.emit('player-connected', {
+        socketId: socket.id
+    });
+
+    socket.on('disconnect', function () {
+        if (socket.game) {
+            io.emit('game-discarded', {
+                gameId: socket.game.id
+            });
+        } else {
+            io.sockets.sockets.forEach(function (_socket) {
+                var game = _socket.game;
+                if (game) {
+                    var players = game.players;
+                    var playerIndex = players.indexOf(socket.id);
+                    if (playerIndex !== -1) {
+                        players.splice(playerIndex, 1);
+                        if (game.players.length === 0) {
+                            _socket.game = null;
+                            io.emit('game-discarded', {
+                                gameId: game.id
+                            });
+                        } else {
+                            io.emit('player-left-game', {
+                                gameId: game.id,
+                                playerSocketId: socket.id
+                            });
+                        }
+                    }
+                }
+            });
+        }
     });
 });
 

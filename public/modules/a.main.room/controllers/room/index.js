@@ -7,7 +7,12 @@ angular.module(module.name).controller(module.name + '.c.' + current.name, [
     function (scope, state, game, socketSrvc) {
         scope.game = game;
         scope.meIndex;
-        scope.winner;
+        scope.over;
+        scope.letters;
+
+        scope.$watchCollection('game.players', function (players) {
+            scope.letters = ['X', 'O', 'Z', 'Y', 'K', 'P', 'R', 'S', 'T', 'Q'].slice(0, players.length);            
+        });
 
         scope.start = function () {
             socketSrvc.emit('start-game', {
@@ -25,8 +30,12 @@ angular.module(module.name).controller(module.name + '.c.' + current.name, [
             });
 
             game.on('over', function (data) {
-                alert('Winner is ' + game.winner);
-                scope.winner = game.winner;
+                if (game.winner) {
+                    alert('Winner is ' + game.winner);
+                } else {
+                    alert('Draw');
+                }
+                scope.over = true;
             });
 
             scope.$on('server:filled', function (e, data) {

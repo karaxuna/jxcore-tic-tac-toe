@@ -7,7 +7,7 @@ angular.module(module.name).controller(module.name + '.c.' + current.name, [
         scope.game = {
             width: 3,
             height: 3,
-            letters: ['X', 'O'],
+            maxPlayers: 2,
             winningScore: 3,
             turnIndex: 0
         };
