@@ -39,7 +39,7 @@ cordova platforms add android
 cordova platforms add ios
 ```
 
-[Download](https://github.com/jxcore/jxcore-cordova-release/raw/master/0.0.4/io.jxcore.node.jx) `io.jxcore.node` cordova plugin, extract it with jxcore and then add it to project:
+[Download](https://github.com/jxcore/jxcore-cordova-release/raw/master/0.0.4/io.jxcore.node.jx) `io.jxcore.node` cordova plugin in the root of project, extract it with jxcore and then add it:
 
 ```bash
 jx io.jxcore.node.jx
