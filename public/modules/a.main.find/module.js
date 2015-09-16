@@ -4,9 +4,14 @@ angular
         '$stateProvider',
         function (stateProvider) {
             stateProvider.state(module.name, {
-                url: '/find',
+                url: '',
                 templateUrl: module.path + '/views/layout.html',
-                controller: module.name + '.c.find'
+                controller: module.name + '.c.find',
+                resolve: {
+                    games: ['socketSrvc', function (socketSrvc) {
+                        return socketSrvc.emit('get-games');
+                    }]
+                }
             });
         }
     ]);

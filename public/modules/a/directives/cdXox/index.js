@@ -4,20 +4,21 @@ angular.module(module.name).directive(current.name, [function(){
         replace: true,
         template: '<canvas width="400" height="400" id="canvas"></canvas>',
         scope: {
-            dimensions: '=',
+            dimWidth: '=',
+            dimHeight: '=',
             winningScore: '=',
-            turn: '=',
-            me: '=',
+            turnIndex: '=',
+            meIndex: '=',
             onInit: '='
         },
         link: function(scope, element, attrs){
             var game = new xox.Game({
                 context: element.get(0).getContext('2d'),
-                width: scope.dimensions,
-                height: scope.dimensions,
+                width: scope.dimWidth,
+                height: scope.dimHeight,
                 winningScore: scope.winningScore,
-                turn: scope.turn,
-                me: scope.me
+                turnIndex: scope.turnIndex,
+                meIndex: scope.meIndex
             });
 
             var canvas = game.scene.context.canvas;

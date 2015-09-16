@@ -1,137 +1,178 @@
-var server = require('jxm'),
-    path = require('path'),
-    alert = Mobile('alert');
+var express = require('express'),
+    app = express(),
+    http = require('http').Server(app),
+    io = require('socket.io')(http),
+    env = app.get('env'),
+    helper = require('./lib/helper'),
+    utils = require('./shared/js/utils'),
+    path = require('path');
 
-var name = 'TicTacToe',
-    url = '/',
-    key = 'NUBISA-STANDARD-KEY-CHANGE-THIS',
-    port = 8000,
-    gameConfig = {
-        dimensions: 3,
-        winningScore: 3,
-        turn: 'x',
-        me: null
-    },
-    game,
-    peer;
+var isMobile = typeof Mobile !== 'undefined';
+var staticFolderPath = path.resolve(__dirname, env === 'development' && !isMobile ? '../../public' : './build');
+app.use(express.static(staticFolderPath));
 
-server.setApplication(name, url, key);
-server.on('start', function() {
-    alert.call('Server started');
+['jxcore', 'cordova'].forEach(function (name) {
+    app.get('/' + name + '.js', function (req, res) {
+        res.send('window.' + name + '="none";');
+    });
 });
 
-server.addJSMethod('connectToServer', function(env, rpd) {
-    alert.call('Server got connection request');
-    if (peer) {
-        alert.call('No peer');
-        server.sendCallBack(env, false);
-    } else {
-        alert.call('Connecting to client. url: ' + rpd.url + '. ip: ' + rpd.ip + '. port: ' + rpd.port);
-        var client = server.createClient(null, rpd.url, key, rpd.ip, rpd.port);
-        client.on('connect', function(client) {
-            alert.call('Connected to client');
-            game = {
-                dimensions: gameConfig.dimensions,
-                winningScore: gameConfig.winningScore,
-                turn: gameConfig.turn,
-                me: gameConfig.turn
-            };
+function getSocketById(socketId) {
+    return io.sockets.sockets.filter(function (socket) {
+        return socket.id === socketId;
+    })[0];
+}
 
-            server.sendCallBack(env, {
-                dimensions: game.dimensions,
-                winningScore: game.winningScore,
-                turn: game.turn,
-                me: game.me === 'x' ? 'o' : 'x'
-            });
+function getGames() {
+    return io.sockets.sockets.filter(function (socket) {
+        return socket.game;
+    }).map(function (socket) {
+        return socket.game;
+    });
+}
 
-            peer = client;
-            Mobile('start').call();
-        });
-        
-        client.on('close', function(client) {
-            alert.call('Peer disconnected');
-            peer = null;
-            game = null;
-        });
+io.on('connection', function(socket) {
+    socket.on('error', function (err) {
+        console.log(err);
+    });
 
-        client.on('error', function(client, err) {
-            alert.call('Error: ' + err);
-        });
-
-        client.Connect();
-    }
-});
-
-server.addJSMethod('fill', function(env, data) {
-    alert.call('Peer filled: ' + data.i + ':' + data.j);
-    Mobile('filled').call(data);
-    server.sendCallBack(env);
-});
-
-Mobile('finish').registerSync(function() {
-    if (peer) {
-        peer.Close();
-    }
-    peer = null;
-    game = null;
-});
-
-Mobile('fill').registerAsync(function(data, callback) {
-    alert.call('Fill called: ' + data.i + ':' + data.j);
-    peer.Call('fill', data, callback);
-});
-
-Mobile('setGameConfig').registerSync(function(data) {
-    gameConfig.dimensions = parseInt(data.dimensions);
-    gameConfig.winningScore = parseInt(data.winningScore);
-});
-
-Mobile('getGameConfig').registerSync(function() {
-    return gameConfig;
-});
-
-Mobile('getGame').registerSync(function() {
-    return game;
-});
-
-Mobile('connectToServer').registerAsync(function(ip, callback) {
-    alert.call('Connecting to server');
-    var client = server.createClient(null, url, key, ip, port);
-    client.on('connect', function(client) {
-        alert.call('Connected to server');
-        var peerData = {
-            port: port,
-            url: url,
-            ip: getLocalIP()
+    socket.on('create-game', function (game, callback) {
+        var game = {
+            id: '' + Date.now(),
+            letters: game.letters,
+            turnIndex: game.turnIndex,
+            width: game.width,
+            height: game.height,
+            winningScore: game.winningScore,
+            creator: socket.id,
+            players: [],
+            started: false
         };
+        socket.game = game;
+        io.emit('game-created', game);
+        callback(null, game);
+    });
 
-        alert.call('Getting game data');
-        client.Call('connectToServer', peerData, function(game, err) {
-            if (err) {
-                alert.call('Error while calling server\'s method. Code: ' + err);
-            } else if (!game) {
-                alert.call('Peer is busy');
-            } else {
-                alert.call('Game data ready. Dimensions: ' + game.dimensions);
-                game = game;
-                peer = client;
-                callback();
-                Mobile('start').call();
+    socket.on('get-games', function (data, callback) {
+        var games = io.sockets.sockets.map(function (_socket) {
+            return _socket.game;
+        }).filter(function (game) {
+            return game;
+        });
+        callback(null, games);
+    });
+
+    socket.on('enter-game', function (data, callback) {
+        var game = io.sockets.sockets.filter(function (_socket) {
+            return _socket.game && _socket.game.id === data.gameId;
+        }).map(function (_socket) {
+            return _socket.game;
+        })[0];
+
+        if (!game) {
+            callback('No game found with id: ' + data.gameId);
+        } else if (game.started) {
+            callback('Game has already started');
+        } else {
+            if (game.players.indexOf(socket.id) === -1) {
+                if (game.letters.length === game.players.length) {
+                    callback('Game is full of players');
+                } else {
+                    game.players.push(socket.id);
+                    io.emit('player-joined-game', {
+                        playerSocketId: socket.id,
+                        gameId: game.id
+                    });
+                }
+            }
+            callback(null, game);
+        }
+    });
+
+    socket.on('start-game', function (data, callback) {
+        var game = socket.game;
+        if (!game) {
+            callback('Game does not exist');
+        } else {
+            game.started = true;
+            io.sockets.sockets.forEach(function (_socket) {
+                _socket.emit('game-started', {
+                    gameId: game.id,
+                    meIndex: game.players.indexOf(_socket.id)
+                });
+            });
+            callback();
+        }
+    });
+
+    socket.on('fill', function (data, callback) {
+        var game = io.sockets.sockets.map(function (_socket) {
+            return _socket.game;
+        }).filter(function (_game) {
+            return _game && _game.id === data.gameId;
+        })[0];
+
+        if (!game) {
+            callback('Game not found');
+        } else if (game.players.indexOf(socket.id) === -1) {
+            callback('You are not playing this game');
+        } else {
+            game.players.forEach(function (playerSocketId) {
+                if (socket.id !== playerSocketId) {
+                    var playerSocket = getSocketById(playerSocketId);
+                    if (playerSocket) {
+                        playerSocket.emit('filled', {
+                            i: data.i,
+                            j: data.j,
+                            gameId: game.id
+                        });
+                    }
+                }
+            });
+            callback();
+        }
+    });
+
+    socket.on('leave-game', function (data, callback) {
+        return io.sockets.sockets.forEach(function (_socket) {
+            if (socket.game) {
+                var game = _socket.game;
+                var players = game.players;
+                players.splice(players.indexOf(socket.id), 1);
+                if (game.players.length === 0) {
+                    _socket.game = null;
+                    io.emit('game-discarded', {
+                        gameId: game.id
+                    });
+                } else {
+                    io.emit('player-left-game', {
+                        gameId: game.id,
+                        playerSocketId: socket.id
+                    });
+                }
             }
         });
     });
 
-    client.on('close', function(client) {
-        alert.call('Peer disconnected');
-        peer = null;
-        game = null;
+    socket.broadcast.emit('player-connected', {
+        socketId: socket.id
     });
 
-    client.on('error', function(client, err) {
-        alert.call('Error: ' + err);
+    socket.on('disconnect', function () {
+        io.sockets.sockets.forEach(function (_socket) {
+            if (socket.game && socket.game.players.indexOf(socket.id) !== -1) {
+                io.emit('player-left-game', {
+                    gameId: socket.game.id,
+                    playerSocketId: socket.id
+                });
+            }
+        });
     });
+});
 
-    client.Connect();
+var port = process.env.PORT || 8001;
+http.listen(port, function() {
+    console.log('listening on *:' + port);
 });
 
 function getLocalIP() {
@@ -175,8 +216,9 @@ function getLocalIP() {
         }
     }
 
-    return ips[0];
+    return 'http://' + ips[0] + ':' + port + '/';
 }
 
-Mobile('getLocalIP').registerSync(getLocalIP);
-server.start();
+if (isMobile) {
+    Mobile('getLocalIP').registerSync(getLocalIP);
+}

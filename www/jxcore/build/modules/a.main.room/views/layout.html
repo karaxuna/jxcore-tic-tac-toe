@@ -1,0 +1,29 @@
+<table ng-if="!game.started">
+    <tr>
+        <th>Width</th>
+        <th>Height</th>
+        <th>W. score</th>
+        <th>Players joined</th>
+        <th></th>
+    </tr>
+    <tr>
+        <td ng-bind="game.width"></td>
+        <td ng-bind="game.height"></td>
+        <td ng-bind="game.winningScore"></td>
+        <td ng-bind="game.players.length"></td>
+        <td>
+            <button type="button" ng-click="start()">Start</button>
+        </td>
+    </tr>
+</table>
+<div ng-if="game.started">
+    <cd-xox
+    me-index="meIndex"
+    dim-width="game.width"
+    dim-height="game.height"
+    winning-score="game.winningScore"
+    turn-index="game.turnIndex"
+    letters="game.letters"
+    on-init="init"
+    ></cd-xox>
+</div>

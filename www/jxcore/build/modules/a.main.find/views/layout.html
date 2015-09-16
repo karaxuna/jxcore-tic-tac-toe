@@ -1,11 +1,24 @@
+<table ng-if="games.length">
+    <tr>
+        <th>Width</th>
+        <th>Height</th>
+        <th>W. score</th>
+        <th>Started</th>
+        <th></th>
+    </tr>
+    <tr ng-repeat="game in games">
+        <td ng-bind="game.width"></td>
+        <td ng-bind="game.height"></td>
+        <td ng-bind="game.winningScore"></td>
+        <td ng-bind="game.started"></td>
+        <td>
+            <button type="button" ng-click="enterGame(game)">Enter</button>
+        </td>
+    </tr>
+</table>
+<div ng-if="!games.length">
+    There are no games available
+</div>
 <div>
-    <form name="findForm" ng-submit="connect()">
-        <div>
-            <label>Partner ip</label>
-            <input type="text" ng-model="model.ip" ng-required="true" />
-        </div>
-        <div>
-            <button ng-click="connectToServer()" ng-disabled="findForm.$invalid">connect</button>
-        </div>
-    </form>
+    <a ui-sref="^.create">Create new game</a>
 </div>
