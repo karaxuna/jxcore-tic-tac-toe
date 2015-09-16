@@ -5,4 +5,8 @@
 
 1. Clone repository:
 
-    git clone https://github.com/karaxuna/jxcore-tic-tac-toe.git
+```
+git clone https://github.com/karaxuna/jxcore-tic-tac-toe.git
+```
+
+2. [Download and install JXcore](http://jxcore.com/downloads/);
