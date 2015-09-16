@@ -32,6 +32,20 @@ cd jxcore-tic-tac-toe
 jx install
 ```
 
+Add platforms:
+
+```bash
+cordova platforms add android
+cordova platforms add ios
+```
+
+[Download](https://github.com/jxcore/jxcore-cordova-release/raw/master/0.0.4/io.jxcore.node.jx) `io.jxcore.node` cordova plugin, extract it with jxcore and then add it to project:
+
+```bash
+jx io.jxcore.node.jx
+cordova plugins add io.jxcore.node
+```
+
 Run application:
 
 ```bash
