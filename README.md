@@ -1,14 +1,8 @@
 # jxcore-tic-tac-toe
-Multiplayer tic tac toe game
+[JXcore cordova](https://github.com/jxcore/jxcore-cordova) application that hosts tic-tac-toe game. Game can be played from application and from browser clients connected to it. Just navigate from browser to url that is displayed in the application and you are connected.
 
-Install developer dependencies:
+## Installation steps:
 
-    jx install
-    
-Add platforms and `io.jxcore.node` plugin, then run:
+1. Clone repository:
 
-    gulp android
-    
-Or run emulator:
-
-    gulp android-emulate
+    git clone https://github.com/karaxuna/jxcore-tic-tac-toe.git
