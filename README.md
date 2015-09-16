@@ -43,3 +43,5 @@ This command automatically installs bower packages and node packages for jxcore,
 ```bash
 gulp start
 ```
+
+It watches for changes in files and performs all necessary steps to rebuild project.
