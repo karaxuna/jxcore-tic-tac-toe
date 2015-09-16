@@ -7,6 +7,7 @@ angular.module(module.name).controller(module.name + '.c.' + current.name, [
     function (scope, state, game, socketSrvc) {
         scope.game = game;
         scope.meIndex;
+        scope.winner;
 
         scope.start = function () {
             socketSrvc.emit('start-game');
@@ -23,6 +24,7 @@ angular.module(module.name).controller(module.name + '.c.' + current.name, [
 
             game.on('over', function (data) {
                 alert('Winner is ' + game.winner);
+                scope.winner = game.winner;
             });
 
             scope.$on('server:filled', function (e, data) {
