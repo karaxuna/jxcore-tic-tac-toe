@@ -18,7 +18,7 @@
         </tr>
         <tr>
             <th>Max players</th>
-            <td ng-bind="game.letters.length"></td>
+            <td ng-bind="game.maxPlayers"></td>
         </tr>
     </table>
     <br/>
@@ -27,16 +27,19 @@
     </div>
 </div>
 <div ng-if="game.started">
-    <cd-xox
-    me-index="meIndex"
-    dim-width="game.width"
-    dim-height="game.height"
-    winning-score="game.winningScore"
-    turn-index="game.turnIndex"
-    letters="game.letters"
-    on-init="init"
-    ></cd-xox>
+    <h3>Your letter is "{{letters[meIndex]}}"</h3>
+    <div>
+        <cd-xox
+        me-index="meIndex"
+        dim-width="game.width"
+        dim-height="game.height"
+        winning-score="game.winningScore"
+        turn-index="game.turnIndex"
+        letters="letters"
+        on-init="init"
+        ></cd-xox>
+    </div>
 </div>
-<div ng-if="winner">
+<div ng-if="over">
     <a ui-sref="^.find">Find or create another game</a>
 </div>
