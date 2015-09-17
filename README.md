@@ -1,6 +1,9 @@
 # jxcore-tic-tac-toe
 [JXcore cordova](https://github.com/jxcore/jxcore-cordova) application that hosts [tic-tac-toe game](https://github.com/karaxuna/kanvas-tic-tac-toe). Game can be played from application and from browser clients connected to it. Just navigate from browser to url that is displayed in the application and you are connected.
 
+![Android](https://raw.githubusercontent.com/karaxuna/jxcore-tic-tac-toe/master/screens/android.png "Android")
+![Browser](https://raw.githubusercontent.com/karaxuna/jxcore-tic-tac-toe/master/screens/browser.png "Browser")
+
 ## Installation steps:
 
 Clone repository:
